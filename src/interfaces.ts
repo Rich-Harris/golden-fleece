@@ -39,3 +39,7 @@ export interface Comment extends Node {
 	block: boolean;
 	text: string;
 }
+
+export interface Options {
+	onComment?: (comment: Comment) => void;
+}

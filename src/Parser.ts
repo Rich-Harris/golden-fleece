@@ -1,4 +1,3 @@
-import { whitespace } from './patterns';
 import {
 	Value,
 	Property,
@@ -6,12 +5,14 @@ import {
 	ObjectExpression,
 	ArrayExpression,
 	Literal,
-	Comment
+	Comment,
+	Options
 } from './interfaces';
 
 type ParserState = (parser: Parser) => (ParserState | void);
 
 const validIdentifier = /[a-zA-Z_$][a-zA-Z0-9_$]*/;
+const whitespace = /[ \t\r\n]/;
 
 export default class Parser {
 	str: string;
@@ -19,10 +20,10 @@ export default class Parser {
 	value: Value;
 	onComment: (comment: Comment) => void;
 
-	constructor(str: string, opts = { onComment: (comment: Comment) => {} }) {
+	constructor(str: string, opts?: Options) {
 		this.str = str;
 		this.index = 0;
-		this.onComment = opts.onComment || function(comment: Comment) {};
+		this.onComment = (opts && opts.onComment) || function(comment: Comment) {};
 
 		this.value = this.readValue();
 		this.allowWhitespaceOrComment();

@@ -1,5 +1,14 @@
 import * as assert from 'assert';
 import * as fleece from '../src/index';
+import {
+	Value,
+	ArrayExpression,
+	ObjectExpression,
+	Literal,
+	Property,
+	Identifier,
+	Comment
+} from '../src/interfaces';
 
 describe('golden-fleece', () => {
 	describe('parse', () => {
@@ -7,7 +16,8 @@ describe('golden-fleece', () => {
 			solo?: boolean;
 			skip?: boolean;
 			input: string;
-			output?: any;
+			output?: Value;
+			comments?: Comment[];
 			error?: RegExp;
 		}> = [
 			// booleans
@@ -203,6 +213,41 @@ describe('golden-fleece', () => {
 					raw: 'null',
 					value: null
 				}
+			},
+
+			// comments
+			{
+				input: '[ true, /*comment*/ false ]',
+				output: {
+					start: 0,
+					end: 27,
+					type: 'ArrayExpression',
+					elements: [
+						{
+							start: 2,
+							end: 6,
+							type: 'Literal',
+							raw: 'true',
+							value: true
+						},
+						{
+							start: 20,
+							end: 25,
+							type: 'Literal',
+							raw: 'false',
+							value: false
+						}
+					]
+				},
+				comments: [
+					{
+						start: 8,
+						end: 19,
+						type: 'Comment',
+						block: false,
+						text: 'comment'
+					}
+				]
 			}
 		];
 
