@@ -1,6 +1,6 @@
 export interface Node {
     start: number;
     end: number;
-    type: 'Object' | 'Array' | 'Boolean' | 'String' | 'Number' | 'Null' | 'Property' | 'Key';
+    type: 'ObjectExpression' | 'ArrayExpression' | 'Literal' | 'Property' | 'Identifier';
     [key: string]: any;
 }

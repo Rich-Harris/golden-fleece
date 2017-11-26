@@ -87,27 +87,18 @@ export default class Parser {
 		return this.str.slice(start);
 	}
 
-	readBoolean(value: boolean): Node {
-		return {
-			start: this.index - (value ? 4 : 5),
-			end: this.index,
-			type: 'Boolean',
-			value
-		};
-	}
-
 	readArray(): Node {
 		const array: Node = {
 			start: this.index - 1,
 			end: null,
-			type: 'Array',
-			children: []
+			type: 'ArrayExpression',
+			elements: []
 		};
 
 		this.allowWhitespace();
 
 		while (this.peek() !== ']') {
-			array.children.push(this.readValue());
+			array.elements.push(this.readValue());
 			this.allowWhitespace();
 
 			if (!this.eat(',')) break;
@@ -123,6 +114,18 @@ export default class Parser {
 		return array;
 	}
 
+	readLiteral(value: boolean | null): Node {
+		const raw = String(value);
+
+		return {
+			start: this.index - raw.length,
+			end: this.index,
+			type: 'Literal',
+			raw,
+			value
+		};
+	}
+
 	readNumber(): Node {
 		const start = this.index;
 		const raw = this.read(/^(?:NaN|-?(?:(?:\d*\.\d+|\d+)(?:[E|e][+|-]?\d+)?|Infinity))/);
@@ -130,7 +133,7 @@ export default class Parser {
 		return {
 			start,
 			end: this.index,
-			type: 'Number',
+			type: 'Literal',
 			raw,
 			value: +raw
 		};
@@ -140,14 +143,14 @@ export default class Parser {
 		const object: Node = {
 			start: this.index - 1,
 			end: null,
-			type: 'Object',
-			children: []
+			type: 'ObjectExpression',
+			properties: []
 		};
 
 		this.allowWhitespace();
 
 		while (this.peek() !== '}') {
-			object.children.push(this.readProperty());
+			object.properties.push(this.readProperty());
 			this.allowWhitespace();
 
 			if (!this.eat(',')) break;
@@ -178,20 +181,20 @@ export default class Parser {
 
 	readPropertyKey(): Node {
 		const start = this.index;
-		const quote = this.read(/^'"/);
+		const quote = this.read(/^['"]/);
 
 		let key: Node;
 
 		if (quote) {
 			key = this.readString(quote);
+			key.name = key.value;
 		} else {
 			const name = this.read(validIdentifier);
 			key = {
 				start,
 				end: this.index,
-				type: 'Key',
-				raw: name,
-				value: name
+				type: 'Identifier',
+				name
 			};
 		}
 
@@ -219,7 +222,7 @@ export default class Parser {
 				return {
 					start,
 					end,
-					type: 'String',
+					type: 'Literal',
 					raw: this.str.slice(start, end),
 					value: this.str.slice(start + 1, end - 1)
 				};
@@ -234,8 +237,9 @@ export default class Parser {
 
 		if (this.eat('[')) return this.readArray();
 		if (this.eat('{')) return this.readObject();
-		if (this.eat('true')) return this.readBoolean(true);
-		if (this.eat('false')) return this.readBoolean(false);
+		if (this.eat('true')) return this.readLiteral(true);
+		if (this.eat('false')) return this.readLiteral(false);
+		if (this.eat('null')) return this.readLiteral(null);
 		if (this.eat("'")) return this.readString("'");
 		if (this.eat('"')) return this.readString('"');
 		if (/(\d|\.)/.test(this.peek())) return this.readNumber();

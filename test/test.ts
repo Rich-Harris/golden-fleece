@@ -1,199 +1,224 @@
 import * as assert from 'assert';
 import * as fleece from '../src/index';
 
-const tests: any[] = [
-	// booleans
-	{
-		input: `true`,
-		output: {
-			start: 0,
-			end: 4,
-			type: 'Boolean',
-			value: true
-		}
-	},
-
-	{
-		input: `false`,
-		output: {
-			start: 0,
-			end: 5,
-			type: 'Boolean',
-			value: false
-		}
-	},
-
-	// numbers
-	{
-		input: `1`,
-		output: {
-			start: 0,
-			end: 1,
-			type: 'Number',
-			raw: '1',
-			value: 1
-		}
-	},
-
-	// strings
-	{
-		input: "'single-quotes'",
-		output: {
-			start: 0,
-			end: 15,
-			type: 'String',
-			raw: "'single-quotes'",
-			value: 'single-quotes'
-		}
-	},
-
-	{
-		input: '"double-quotes"',
-		output: {
-			start: 0,
-			end: 15,
-			type: 'String',
-			raw: '"double-quotes"',
-			value: 'double-quotes'
-		}
-	},
-
-	// objects
-	{
-		input: `{}`,
-		output: {
-			start: 0,
-			end: 2,
-			type: 'Object',
-			children: []
-		}
-	},
-
-	{
-		input: `{ foo: 1, bar: 2 }`,
-		output: {
-			start: 0,
-			end: 18,
-			type: 'Object',
-			children: [
-				{
-					start: 2,
-					end: 8,
-					type: 'Property',
-					key: {
-						start: 2,
-						end: 5,
-						type: 'Key',
-						raw: 'foo',
-						value: 'foo'
-					},
-					value: {
-						start: 7,
-						end: 8,
-						type: 'Number',
-						raw: '1',
-						value: 1
-					}
-				},
-
-				{
-					start: 10,
-					end: 16,
-					type: 'Property',
-					key: {
-						start: 10,
-						end: 13,
-						type: 'Key',
-						raw: 'bar',
-						value: 'bar'
-					},
-					value: {
-						start: 15,
-						end: 16,
-						type: 'Number',
-						raw: '2',
-						value: 2
-					}
+describe('golden-fleece', () => {
+	describe('parse', () => {
+		const tests: Array<{
+			solo?: boolean;
+			skip?: boolean;
+			input: string;
+			output?: any;
+			error?: RegExp;
+		}> = [
+			// booleans
+			{
+				input: `true`,
+				output: {
+					start: 0,
+					end: 4,
+					type: 'Literal',
+					raw: 'true',
+					value: true
 				}
-			]
-		}
-	},
+			},
 
-	{
-		input: `{ array: [ true ] }`,
-		output: {
-			start: 0,
-			end: 19,
-			type: 'Object',
-			children: [{
-				start: 2,
-				end: 17,
-				type: 'Property',
-				key: {
-					start: 2,
-					end: 7,
-					type: 'Key',
-					raw: 'array',
-					value: 'array'
-				},
-				value: {
-					start: 9,
-					end: 17,
-					type: 'Array',
-					children: [{
-						start: 11,
-						end: 15,
-						type: 'Boolean',
-						value: true
+			{
+				input: `false`,
+				output: {
+					start: 0,
+					end: 5,
+					type: 'Literal',
+					raw: 'false',
+					value: false
+				}
+			},
+
+			// numbers
+			{
+				input: `1`,
+				output: {
+					start: 0,
+					end: 1,
+					type: 'Literal',
+					raw: '1',
+					value: 1
+				}
+			},
+
+			// strings
+			{
+				input: "'single-quotes'",
+				output: {
+					start: 0,
+					end: 15,
+					type: 'Literal',
+					raw: "'single-quotes'",
+					value: 'single-quotes'
+				}
+			},
+
+			{
+				input: '"double-quotes"',
+				output: {
+					start: 0,
+					end: 15,
+					type: 'Literal',
+					raw: '"double-quotes"',
+					value: 'double-quotes'
+				}
+			},
+
+			// objects
+			{
+				input: `{}`,
+				output: {
+					start: 0,
+					end: 2,
+					type: 'ObjectExpression',
+					properties: []
+				}
+			},
+
+			{
+				input: `{ foo: 1, "bar": 2 }`,
+				output: {
+					start: 0,
+					end: 20,
+					type: 'ObjectExpression',
+					properties: [
+						{
+							start: 2,
+							end: 8,
+							type: 'Property',
+							key: {
+								start: 2,
+								end: 5,
+								type: 'Identifier',
+								name: 'foo'
+							},
+							value: {
+								start: 7,
+								end: 8,
+								type: 'Literal',
+								raw: '1',
+								value: 1
+							}
+						},
+
+						{
+							start: 10,
+							end: 18,
+							type: 'Property',
+							key: {
+								start: 10,
+								end: 15,
+								type: 'Literal',
+								raw: '"bar"',
+								value: 'bar',
+								name: 'bar'
+							},
+							value: {
+								start: 17,
+								end: 18,
+								type: 'Literal',
+								raw: '2',
+								value: 2
+							}
+						}
+					]
+				}
+			},
+
+			{
+				input: `{ array: [ true ] }`,
+				output: {
+					start: 0,
+					end: 19,
+					type: 'ObjectExpression',
+					properties: [{
+						start: 2,
+						end: 17,
+						type: 'Property',
+						key: {
+							start: 2,
+							end: 7,
+							type: 'Identifier',
+							name: 'array'
+						},
+						value: {
+							start: 9,
+							end: 17,
+							type: 'ArrayExpression',
+							elements: [{
+								start: 11,
+								end: 15,
+								type: 'Literal',
+								value: true,
+								raw: 'true'
+							}]
+						}
 					}]
 				}
-			}]
-		}
-	},
+			},
 
-	// arrays
-	{
-		input: `[]`,
-		output: {
-			start: 0,
-			end: 2,
-			type: 'Array',
-			children: []
-		}
-	},
+			// arrays
+			{
+				input: `[]`,
+				output: {
+					start: 0,
+					end: 2,
+					type: 'ArrayExpression',
+					elements: []
+				}
+			},
 
-	{
-		input: `[true]`,
-		output: {
-			start: 0,
-			end: 6,
-			type: 'Array',
-			children: [{
-				start: 1,
-				end: 5,
-				type: 'Boolean',
-				value: true
-			}]
-		}
-	},
+			{
+				input: `[true]`,
+				output: {
+					start: 0,
+					end: 6,
+					type: 'ArrayExpression',
+					elements: [{
+						start: 1,
+						end: 5,
+						type: 'Literal',
+						value: true,
+						raw: 'true'
+					}]
+				}
+			},
 
-	{
-		input: `[true true]`,
-		error: /expected ',' or ']'/
-	}
-]
+			{
+				input: `[true true]`,
+				error: /expected ',' or ']'/
+			},
 
-describe('golden-fleece', () => {
-	tests.forEach((test, i) => {
-		it(`test ${i}`, () => {
-			if (test.error) {
-				assert.throws(() => {
-					fleece.parse(test.input);
-				}, test.error);
-			} else {
-				const parsed = fleece.parse(test.input);
-				assert.deepEqual(parsed, test.output);
+			// null
+			{
+				input: 'null',
+				output: {
+					start: 0,
+					end: 4,
+					type: 'Literal',
+					raw: 'null',
+					value: null
+				}
 			}
+		];
+
+		tests.forEach((test, i) => {
+			const padded = test.input.split('\n').map(line => `      ${line}`).join('\n');
+
+			(test.solo ? it.only : test.skip ? it.skip : it)(`test ${i}\n${padded} `, () => {
+				if (test.error) {
+					assert.throws(() => {
+						fleece.parse(test.input);
+					}, test.error);
+				} else {
+					const parsed = fleece.parse(test.input);
+					assert.deepEqual(parsed, test.output);
+				}
+			});
 		});
 	});
 });

@@ -12,8 +12,8 @@ export default class Parser {
     peek(): string;
     read(pattern: RegExp): string;
     readUntil(pattern: RegExp): string;
-    readBoolean(value: boolean): Node;
     readArray(): Node;
+    readLiteral(value: boolean | null): Node;
     readNumber(): Node;
     readObject(): Node;
     readProperty(): Node;
