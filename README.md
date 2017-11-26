@@ -10,23 +10,34 @@ For the [Svelte REPL](https://svlte.technology/repl), where we want to allow arb
 ## Usage
 
 ```js
-import { parse } from 'golden-fleece';
+import * as fleece from 'golden-fleece';
 
-const parsed = parse(`{
+const str = `{
 	number: 1,
 	string: 'yes',
-	object: {
-		nested: true
-	},
-	array: [
-		'this',
-		'that',
-		'the-other'
-	]
-}`);
+	object: { nested: true },
+	array: ['this', 'that', 'the other']
+}`
 
-parsed.find('string');
-// { TODO }
+// generate an ESTree-compliant AST
+const ast = fleece.parse(str);
+// { start: 0, end: 108, type: 'ObjectExpression', properties: [...] }
+
+// evaluate a string
+const value = fleece.evaluate(str);
+value.number; // 1
+
+// patch a string without changing the formatting
+value.number = 42;
+value.array[2] = 'EVERYTHING';
+const patched = fleece.patch(str, value);
+
+patched === `{
+	number: 42,
+	string: 'yes',
+	object: { nested: true },
+	array: ['this', 'that', 'EVERYTHING']
+}`; // true
 ```
 
 ## License
