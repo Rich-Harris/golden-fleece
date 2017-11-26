@@ -51,14 +51,18 @@ answer === 42; // true
 This is where it gets fun:
 
 ```js
-fleece.patch(`
+const str = `
 	number: 1,
 	string: 'yes',
 	object: { nested: true },
 	array: ['this', 'that', 'the other']
-`, {
+`;
 
-}) === `{
+const object = fleece.evaluate(str);
+object.number = 42;
+object.array[2] = 'EVERYTHING';
+
+fleece.patch(str, object) === `{
 	number: 42,
 	string: 'yes',
 	object: { nested: true },
