@@ -252,15 +252,17 @@ describe('golden-fleece', () => {
 		];
 
 		tests.forEach((test, i) => {
-			const padded = test.input.split('\n').map(line => `      ${line}`).join('\n');
+			const input = test.input.replace(/^\t{4}/gm, '');
+
+			const padded = input.split('\n').map(line => `      ${line}`).join('\n');
 
 			(test.solo ? it.only : test.skip ? it.skip : it)(`test ${i}\n${padded} `, () => {
 				if (test.error) {
 					assert.throws(() => {
-						fleece.parse(test.input);
+						fleece.parse(input);
 					}, test.error);
 				} else {
-					const parsed = fleece.parse(test.input);
+					const parsed = fleece.parse(input);
 					assert.deepEqual(parsed, test.output);
 				}
 			});
@@ -286,21 +288,164 @@ describe('golden-fleece', () => {
 		];
 
 		tests.forEach((test, i) => {
-			const padded = test.input.split('\n').map(line => `      ${line}`).join('\n');
+			const input = test.input.replace(/^\t{4}/gm, '');
+
+			const padded = input.split('\n').map(line => `      ${line}`).join('\n');
 
 			(test.solo ? it.only : test.skip ? it.skip : it)(`test ${i}\n${padded} `, () => {
-				const value = fleece.evaluate(test.input);
+				const value = fleece.evaluate(input);
 				assert.deepEqual(value, test.output);
 			});
 		});
 	});
 
-	describe('patch', () => {
-		it('patches a string with a numeric value', () => {
-			assert.equal(
-				fleece.patch(`  1  `, 42),
-				`  42  `
-			);
+	describe.only('patch', () => {
+		const tests: Array<{
+			solo?: boolean;
+			skip?: boolean;
+			input: string;
+			value: any;
+			output: string;
+		}> = [
+			{
+				input: `  1  `,
+				value: 42,
+				output: `  42  `
+			},
+
+			{
+				input: `  "x"  `,
+				value: 'y',
+				output: `  "y"  `
+			},
+
+			{
+				input: `  'x'  `,
+				value: 'y',
+				output: `  'y'  `
+			},
+
+			{
+				input: '1',
+				value: null,
+				output: 'null'
+			},
+
+			{
+				input: '1',
+				value: 'x',
+				output: `"x"`
+			},
+
+			{
+				input: `"x"`,
+				value: 1,
+				output: `1`
+			},
+
+			{
+				input: `[ true, /*comment*/ false ]`,
+				value: [false, true],
+				output: `[ false, /*comment*/ true ]`
+			},
+
+			{
+				input: `[  ]`,
+				value: [],
+				output: `[  ]`
+			},
+
+			{
+				input: `[ 1 ]`,
+				value: [],
+				output: `[]`
+			},
+
+			{
+				input: `[]`,
+				value: [1, 2, [3, 4]],
+				output: `[
+					1,
+					2,
+					[
+						3,
+						4
+					]
+				]`
+			},
+
+			{
+				input: `[1, 2]`,
+				value: [1, 2, 3],
+				output: `[1, 2, 3]`
+			},
+
+			{
+				input: `[ 1, 2 ]`,
+				value: [1, 2, 3],
+				output: `[ 1, 2, 3 ]`
+			},
+
+			{
+				input: `[
+					1, // a comment
+					2
+				]`,
+				value: [1, 2, 3],
+				output: `[
+					1, // a comment
+					2,
+					3
+				]`
+			},
+
+			{
+				input: `[ 1, 2, 3 ]`,
+				value: [1, 2],
+				output: `[ 1, 2 ]`
+			},
+
+			{
+				input: `{  }`,
+				value: {},
+				output: `{  }`
+			},
+
+			{
+				input: `{ foo: 1 }`,
+				value: {},
+				output: `{}`
+			},
+
+			{
+				input: `{ foo: 1, bar: 2 }`,
+				value: { bar: 3, foo: 4 },
+				output: `{ foo: 4, bar: 3 }`
+			},
+
+			{
+				input: `{ foo: 1, bar: 2 }`,
+				value: { bar: 3, baz: 4 },
+				output: `{ bar: 3, baz: 4 }`
+			},
+
+			{
+				input: `{ foo: 1, bar: 2 }`,
+				value: { foo: 3 },
+				output: `{ foo: 3 }`
+			}
+		];
+
+		tests.forEach((test, i) => {
+			const input = test.input.replace(/^\t{4}/gm, '');
+			const expected = test.output.replace(/^\t{4}/gm, '');
+
+			const padded = input.split('\n').map(line => `      ${line}`).join('\n');
+
+			(test.solo ? it.only : test.skip ? it.skip : it)(`test ${i}\n${padded} `, () => {
+				const patched = fleece.patch(input, test.value);
+				assert.equal(patched, expected);
+			});
 		});
 	});
 });

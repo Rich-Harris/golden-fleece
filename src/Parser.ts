@@ -1,3 +1,4 @@
+import { whitespace, validIdentifier } from './shared';
 import {
 	Value,
 	Property,
@@ -11,19 +12,22 @@ import {
 
 type ParserState = (parser: Parser) => (ParserState | void);
 
-const validIdentifier = /[a-zA-Z_$][a-zA-Z0-9_$]*/;
-const whitespace = /[ \t\r\n]/;
+function noop(){}
 
 export default class Parser {
 	str: string;
 	index: number;
 	value: Value;
+
 	onComment: (comment: Comment) => void;
+	onValue: (value: Value) => void;
 
 	constructor(str: string, opts?: Options) {
 		this.str = str;
 		this.index = 0;
-		this.onComment = (opts && opts.onComment) || function(comment: Comment) {};
+
+		this.onComment = (opts && opts.onComment) || noop;
+		this.onValue = (opts && opts.onValue) || noop;
 
 		this.value = this.readValue();
 		this.allowWhitespaceOrComment();
@@ -288,8 +292,6 @@ export default class Parser {
 		if (this.eat("'")) return this.readString("'");
 		if (this.eat('"')) return this.readString('"');
 		if (/(\d|\.)/.test(this.peek())) return this.readNumber();
-
-		console.log('still here!', this.remaining());
 	}
 
 	remaining() {

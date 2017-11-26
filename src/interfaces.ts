@@ -42,4 +42,5 @@ export interface Comment extends Node {
 
 export interface Options {
 	onComment?: (comment: Comment) => void;
+	onValue?: (value: Value) => void;
 }
