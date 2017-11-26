@@ -284,15 +284,79 @@ describe('golden-fleece', () => {
 			{
 				input: `{ foo: 1, "bar": 2 }`,
 				output: { foo: 1, bar: 2 }
+			},
+
+			{
+				input: `[1,]`,
+				output: [1]
+			},
+
+			{
+				input: `{ foo: 1, }`,
+				output: { foo: 1 }
+			},
+
+			{
+				// from http://json5.org/
+				input: `{
+					foo: 'bar',
+					while: true,
+
+					this: 'is a \
+multi-line string',
+
+					// this is an inline comment
+					here: 'is another', // inline comment
+
+					/* this is a block comment
+					that continues on another line */
+
+					hex: 0xDEADbeef,
+					half: .5,
+					delta: +10,
+					to: Infinity,   // and beyond!
+
+					finally: 'a trailing comma',
+					oh: [
+						"we shouldn't forget",
+						'arrays can have',
+						'trailing commas too',
+					],
+				}`,
+				output: {
+					foo: 'bar',
+					while: true,
+
+					this: 'is a multi-line string',
+
+					// this is an inline comment
+					here: 'is another', // inline comment
+
+					/* this is a block comment
+					that continues on another line */
+
+					hex: 0xDEADbeef,
+					half: .5,
+					delta: +10,
+					to: Infinity,   // and beyond!
+
+					finally: 'a trailing comma',
+					oh: [
+						"we shouldn't forget",
+						'arrays can have',
+						'trailing commas too',
+					],
+				}
 			}
 		];
 
 		tests.forEach((test, i) => {
-			const input = test.input.replace(/^\t{4}/gm, '');
+			const input = test.input.replace(/^\t{4}/g, '');
 
 			const padded = input.split('\n').map(line => `      ${line}`).join('\n');
 
 			(test.solo ? it.only : test.skip ? it.skip : it)(`test ${i}\n${padded} `, () => {
+				console.log({input})
 				const value = fleece.evaluate(input);
 				assert.deepEqual(value, test.output);
 			});
@@ -311,6 +375,30 @@ describe('golden-fleece', () => {
 				input: `  1  `,
 				value: 42,
 				output: `  42  `
+			},
+
+			{
+				input: `0xa`,
+				value: 11,
+				output: `0xb`
+			},
+
+			{
+				input: `0b10`,
+				value: 7,
+				output: `0b111`
+			},
+
+			{
+				input: `+10`,
+				value: 5,
+				output: `+5`
+			},
+
+			{
+				input: `-.5`,
+				value: -0.2,
+				output: `-.2`
 			},
 
 			{
@@ -466,6 +554,26 @@ describe('golden-fleece', () => {
 						three: 'potato',
 						four: 'potato'
 					}
+				}`
+			},
+
+			{
+				input: `{
+					largeArray: [
+						1,
+						2,
+						[ 3, 4 ]
+					]
+				}`,
+				value: {
+					largeArray: [5, 6, [7, 8]]
+				},
+				output: `{
+					largeArray: [
+						5,
+						6,
+						[ 7, 8 ]
+					]
 				}`
 			}
 		];

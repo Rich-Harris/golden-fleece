@@ -11,6 +11,7 @@ import {
 	Property,
 	ArrayExpression,
 	ObjectExpression,
+	Literal,
 	Comment
 } from './interfaces';
 
@@ -70,7 +71,11 @@ function patchValue(
 		return stringifyString(value, quote);
 	}
 
-	if (type === 'number' || type === 'boolean' || value === null) {
+	if (type === 'number') {
+		return patchNumber((<Literal>node).raw, value);
+	}
+
+	if (type === 'boolean' || value === null) {
 		return String(value);
 	}
 
@@ -107,6 +112,19 @@ function patchValue(
 	}
 
 	throw new Error(`Cannot stringify ${type}s`);
+}
+
+function patchNumber(raw: string, value: number) {
+	if (raw.slice(0, 2) === '0x') return '0x' + value.toString(16);
+	if (raw.slice(0, 2) === '0b') return '0b' + value.toString(2);
+
+	const match = /^([-+])?(\.)?/.exec(raw);
+
+	if (match && match[0].length > 0) {
+		return (match[1] || '') + (match[2] ? String(Math.abs(value)).slice(1) : String(value));
+	}
+
+	return String(value);
 }
 
 function patchArray(

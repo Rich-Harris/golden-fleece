@@ -104,7 +104,7 @@ export default class Parser {
 	match(str: string) {
 		if (this.str.slice(this.index, this.index + str.length) === str) {
 			this.index += str.length;
-			return true;
+			return str;
 		}
 	}
 
@@ -209,7 +209,14 @@ export default class Parser {
 
 	readNumber(): Literal {
 		const start = this.index;
-		const raw = this.read(/^(?:NaN|-?(?:(?:\d*\.\d+|\d+)(?:[E|e][+|-]?\d+)?|Infinity))/);
+
+		const raw = (
+			this.match('NaN') ||
+			this.read(/-?Infinity/) ||
+			this.read(/0x[a-fA-F0-9]+/) ||
+			this.read(/0b[01]+/) ||
+			this.read(/^(?:[-+]?(?:(?:\d*\.\d+|\d+)(?:[E|e][+|-]?\d+)?))/)
+		);
 
 		if (raw) {
 			return {
