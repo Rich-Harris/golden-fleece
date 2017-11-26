@@ -1,5 +1,5 @@
 import Parser from './Parser';
-import { Node } from './interfaces';
+import { Value, Property } from './interfaces';
 
 export function parse(str: string) {
 	const parser = new Parser(str);
@@ -11,7 +11,7 @@ export function evaluate(str: string) {
 	return getValue(ast);
 }
 
-function getValue(node: Node) {
+function getValue(node: Value): any {
 	if (node.type === 'Literal') {
 		return node.value;
 	}
@@ -22,9 +22,13 @@ function getValue(node: Node) {
 
 	if (node.type === 'ObjectExpression') {
 		const obj: Record<string, any> = {};
-		node.properties.forEach((prop: Node) => {
+		node.properties.forEach((prop: Property) => {
 			obj[prop.key.name] = getValue(prop.value);
 		});
 		return obj;
 	}
+}
+
+export function patch(str: string, value: any) {
+	// TODO
 }

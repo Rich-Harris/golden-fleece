@@ -1,5 +1,13 @@
 import { whitespace } from './patterns';
-import { Node } from './interfaces';
+import {
+	Value,
+	Property,
+	Identifier,
+	ObjectExpression,
+	ArrayExpression,
+	Literal,
+	Comment
+} from './interfaces';
 
 type ParserState = (parser: Parser) => (ParserState | void);
 
@@ -8,14 +16,16 @@ const validIdentifier = /[a-zA-Z_$][a-zA-Z0-9_$]*/;
 export default class Parser {
 	str: string;
 	index: number;
-	value: Node;
+	value: Value;
+	onComment: (comment: Comment) => void;
 
-	constructor(str: string) {
+	constructor(str: string, opts = { onComment: (comment: Comment) => {} }) {
 		this.str = str;
 		this.index = 0;
+		this.onComment = opts.onComment || function(comment: Comment) {};
 
 		this.value = this.readValue();
-		this.allowWhitespace();
+		this.allowWhitespaceOrComment();
 
 		if (this.index < this.str.length) {
 			throw new Error(`Unexpected character '${this.peek()}'`)
@@ -26,13 +36,47 @@ export default class Parser {
 		this.error(err.message.replace(/ \(\d+:\d+\)$/, ''), err.pos);
 	}
 
-	allowWhitespace() {
+	allowWhitespaceOrComment() {
 		while (
 			this.index < this.str.length &&
 			whitespace.test(this.str[this.index])
 		) {
 			this.index++;
 		}
+
+		const start = this.index;
+
+		if (this.eat('/')) {
+			if (this.eat('/')) {
+				// line comment
+				const text = this.readUntil(/\n/);
+
+				this.onComment({
+					start,
+					end: this.index,
+					type: 'Comment',
+					text,
+					block: false
+				});
+			} else if (this.eat('*')) {
+				// block comment
+				const text = this.readUntil(/\*\//);
+
+				this.onComment({
+					start,
+					end: this.index,
+					type: 'Comment',
+					text,
+					block: true
+				});
+
+				this.eat('*/');
+			}
+		} else {
+			return;
+		}
+
+		this.allowWhitespaceOrComment();
 	}
 
 	error(message: string, index = this.index) {
@@ -87,23 +131,23 @@ export default class Parser {
 		return this.str.slice(start);
 	}
 
-	readArray(): Node {
-		const array: Node = {
+	readArray(): ArrayExpression {
+		const array: ArrayExpression = {
 			start: this.index - 1,
 			end: null,
 			type: 'ArrayExpression',
 			elements: []
 		};
 
-		this.allowWhitespace();
+		this.allowWhitespaceOrComment();
 
 		while (this.peek() !== ']') {
 			array.elements.push(this.readValue());
-			this.allowWhitespace();
+			this.allowWhitespaceOrComment();
 
 			if (!this.eat(',')) break;
 
-			this.allowWhitespace();
+			this.allowWhitespaceOrComment();
 		}
 
 		if (!this.eat(']')) {
@@ -114,7 +158,7 @@ export default class Parser {
 		return array;
 	}
 
-	readLiteral(value: boolean | null): Node {
+	readLiteral(value: boolean | null): Literal {
 		const raw = String(value);
 
 		return {
@@ -126,7 +170,7 @@ export default class Parser {
 		};
 	}
 
-	readNumber(): Node {
+	readNumber(): Literal {
 		const start = this.index;
 		const raw = this.read(/^(?:NaN|-?(?:(?:\d*\.\d+|\d+)(?:[E|e][+|-]?\d+)?|Infinity))/);
 
@@ -139,23 +183,23 @@ export default class Parser {
 		};
 	}
 
-	readObject(): Node {
-		const object: Node = {
+	readObject(): ObjectExpression {
+		const object: ObjectExpression = {
 			start: this.index - 1,
 			end: null,
 			type: 'ObjectExpression',
 			properties: []
 		};
 
-		this.allowWhitespace();
+		this.allowWhitespaceOrComment();
 
 		while (this.peek() !== '}') {
 			object.properties.push(this.readProperty());
-			this.allowWhitespace();
+			this.allowWhitespaceOrComment();
 
 			if (!this.eat(',')) break;
 
-			this.allowWhitespace();
+			this.allowWhitespaceOrComment();
 		}
 
 		this.eat('}', true);
@@ -164,10 +208,10 @@ export default class Parser {
 		return object;
 	}
 
-	readProperty(): Node {
-		this.allowWhitespace();
+	readProperty(): Property {
+		this.allowWhitespaceOrComment();
 
-		const property: Node = {
+		const property: Property = {
 			start: this.index,
 			end: null,
 			type: 'Property',
@@ -179,15 +223,15 @@ export default class Parser {
 		return property;
 	}
 
-	readPropertyKey(): Node {
+	readPropertyKey(): Identifier | Literal {
 		const start = this.index;
 		const quote = this.read(/^['"]/);
 
-		let key: Node;
+		let key: Identifier | Literal;
 
 		if (quote) {
 			key = this.readString(quote);
-			key.name = key.value;
+			key.name = String(key.value);
 		} else {
 			const name = this.read(validIdentifier);
 			key = {
@@ -198,13 +242,13 @@ export default class Parser {
 			};
 		}
 
-		this.allowWhitespace();
+		this.allowWhitespaceOrComment();
 		this.eat(':', true);
 
 		return key;
 	}
 
-	readString(quote: string): Node {
+	readString(quote: string): Literal {
 		const start = this.index - 1;
 
 		let escaped = false;
@@ -232,8 +276,8 @@ export default class Parser {
 		this.error(`Unexpected end of input`);
 	}
 
-	readValue(): Node {
-		this.allowWhitespace();
+	readValue(): Value {
+		this.allowWhitespaceOrComment();
 
 		if (this.eat('[')) return this.readArray();
 		if (this.eat('{')) return this.readObject();
@@ -256,6 +300,6 @@ export default class Parser {
 			this.error(`Expected whitespace`);
 		}
 
-		this.allowWhitespace();
+		this.allowWhitespaceOrComment();
 	}
 }

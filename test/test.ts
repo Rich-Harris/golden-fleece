@@ -222,7 +222,7 @@ describe('golden-fleece', () => {
 		});
 	});
 
-	describe.only('evaluate', () => {
+	describe('evaluate', () => {
 		const tests: Array<{
 			solo?: boolean;
 			skip?: boolean;
@@ -247,6 +247,15 @@ describe('golden-fleece', () => {
 				const value = fleece.evaluate(test.input);
 				assert.deepEqual(value, test.output);
 			});
+		});
+	});
+
+	describe('patch', () => {
+		it('patches a string with a numeric value', () => {
+			assert.equal(
+				fleece.patch(`  1  `, 42),
+				`  42  `
+			);
 		});
 	});
 });
