@@ -14,7 +14,11 @@ export default class Parser {
     readUntil(pattern: RegExp): string;
     readBoolean(value: boolean): Node;
     readArray(): Node;
+    readNumber(): Node;
     readObject(): Node;
+    readProperty(): Node;
+    readPropertyKey(): Node;
+    readString(quote: string): Node;
     readValue(): Node;
     remaining(): string;
     requireWhitespace(): void;

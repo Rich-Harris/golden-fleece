@@ -3,6 +3,8 @@ import { Node } from './interfaces';
 
 type ParserState = (parser: Parser) => (ParserState | void);
 
+const validIdentifier = /[a-zA-Z_$][a-zA-Z0-9_$]*/;
+
 export default class Parser {
 	str: string;
 	index: number;
@@ -99,13 +101,13 @@ export default class Parser {
 			start: this.index - 1,
 			end: null,
 			type: 'Array',
-			elements: []
+			children: []
 		};
 
 		this.allowWhitespace();
 
 		while (this.peek() !== ']') {
-			const element = this.readValue();
+			array.children.push(this.readValue());
 			this.allowWhitespace();
 
 			if (!this.eat(',')) break;
@@ -113,10 +115,25 @@ export default class Parser {
 			this.allowWhitespace();
 		}
 
-		this.eat(']', true);
+		if (!this.eat(']')) {
+			this.error(`expected ',' or ']'`);
+		}
 
 		array.end = this.index;
 		return array;
+	}
+
+	readNumber(): Node {
+		const start = this.index;
+		const raw = this.read(/^(?:NaN|-?(?:(?:\d*\.\d+|\d+)(?:[E|e][+|-]?\d+)?|Infinity))/);
+
+		return {
+			start,
+			end: this.index,
+			type: 'Number',
+			raw,
+			value: +raw
+		};
 	}
 
 	readObject(): Node {
@@ -124,13 +141,13 @@ export default class Parser {
 			start: this.index - 1,
 			end: null,
 			type: 'Object',
-			properties: []
+			children: []
 		};
 
 		this.allowWhitespace();
 
 		while (this.peek() !== '}') {
-			const element = this.readValue();
+			object.children.push(this.readProperty());
 			this.allowWhitespace();
 
 			if (!this.eat(',')) break;
@@ -144,15 +161,86 @@ export default class Parser {
 		return object;
 	}
 
-	readValue() {
+	readProperty(): Node {
+		this.allowWhitespace();
+
+		const property: Node = {
+			start: this.index,
+			end: null,
+			type: 'Property',
+			key: this.readPropertyKey(),
+			value: this.readValue()
+		};
+
+		property.end = this.index;
+		return property;
+	}
+
+	readPropertyKey(): Node {
+		const start = this.index;
+		const quote = this.read(/^'"/);
+
+		let key: Node;
+
+		if (quote) {
+			key = this.readString(quote);
+		} else {
+			const name = this.read(validIdentifier);
+			key = {
+				start,
+				end: this.index,
+				type: 'Key',
+				raw: name,
+				value: name
+			};
+		}
+
+		this.allowWhitespace();
+		this.eat(':', true);
+
+		return key;
+	}
+
+	readString(quote: string): Node {
+		const start = this.index - 1;
+
+		let escaped = false;
+		let char: string;
+		while (this.index < this.str.length) {
+			const char = this.str[this.index++];
+
+			if (escaped) {
+				escaped = false;
+			} else if (char === '\\') {
+				escaped = true;
+			} else if (char === quote) {
+				const end = this.index;
+
+				return {
+					start,
+					end,
+					type: 'String',
+					raw: this.str.slice(start, end),
+					value: this.str.slice(start + 1, end - 1)
+				};
+			}
+		}
+
+		this.error(`Unexpected end of input`);
+	}
+
+	readValue(): Node {
 		this.allowWhitespace();
 
 		if (this.eat('[')) return this.readArray();
 		if (this.eat('{')) return this.readObject();
-		if (this.match('true')) return this.readBoolean(true);
-		if (this.match('false')) return this.readBoolean(false);
+		if (this.eat('true')) return this.readBoolean(true);
+		if (this.eat('false')) return this.readBoolean(false);
+		if (this.eat("'")) return this.readString("'");
+		if (this.eat('"')) return this.readString('"');
+		if (/(\d|\.)/.test(this.peek())) return this.readNumber();
 
-		// TODO strings, numbers
+		console.log('still here!', this.remaining());
 	}
 
 	remaining() {
