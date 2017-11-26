@@ -221,4 +221,32 @@ describe('golden-fleece', () => {
 			});
 		});
 	});
+
+	describe.only('evaluate', () => {
+		const tests: Array<{
+			solo?: boolean;
+			skip?: boolean;
+			input: string;
+			output?: any;
+		}> = [
+			{
+				input: `true`,
+				output: true
+			},
+
+			{
+				input: `{ foo: 1, "bar": 2 }`,
+				output: { foo: 1, bar: 2 }
+			}
+		];
+
+		tests.forEach((test, i) => {
+			const padded = test.input.split('\n').map(line => `      ${line}`).join('\n');
+
+			(test.solo ? it.only : test.skip ? it.skip : it)(`test ${i}\n${padded} `, () => {
+				const value = fleece.evaluate(test.input);
+				assert.deepEqual(value, test.output);
+			});
+		});
+	});
 });
