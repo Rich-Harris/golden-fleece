@@ -1,0 +1,31 @@
+{
+  "name": "golden-fleece",
+  "description": "Parse JSON5 strings",
+  "version": "0.0.1",
+  "main": "golden-fleece.umd.js",
+  "module": "golden-fleece.es.js",
+  "types": "types/index.d.ts",
+  "files": [
+    "golden-fleece.es.js",
+    "golden-fleece.umd.js",
+    "src"
+  ],
+  "devDependencies": {
+    "@types/mocha": "^2.2.42",
+    "@types/node": "^8.0.26",
+    "glob": "^7.1.2",
+    "mocha": "^3.5.0",
+    "rollup": "^0.49.2",
+    "rollup-plugin-typescript": "^0.8.1",
+    "rollup-plugin-virtual": "^1.0.1",
+    "sander": "^0.6.0",
+    "ts-node": "^3.3.0",
+    "typescript": "^2.5.2"
+  },
+  "scripts": {
+    "build-declarations": "tsc -d && node scripts/move-declaration-files.js",
+    "build": "npm run build-declarations && rollup -c",
+    "test": "mocha --opts mocha.opts",
+    "pretest": "npm run build"
+  }
+}
