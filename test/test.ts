@@ -445,6 +445,28 @@ describe('golden-fleece', () => {
 				input: `{ foo: 1, bar: 2, baz: null }`,
 				value: { foo: 1, bar: 2, baz: { qux: 3 } },
 				output: `{ foo: 1, bar: 2, baz: { qux: 3 } }`
+			},
+
+			{
+				input: `{
+					largeObject: {
+						one: 'thing',
+						two: 'thing',
+						red: 'thing',
+						blue: 'thing'
+					}
+				}`,
+				value: {
+					largeObject: { three: 'potato', four: 'potato', one: 'potato', two: 'potato' }
+				},
+				output: `{
+					largeObject: {
+						one: 'potato',
+						two: 'potato',
+						three: 'potato',
+						four: 'potato'
+					}
+				}`
 			}
 		];
 

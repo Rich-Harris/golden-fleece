@@ -91,7 +91,6 @@ export default class Parser {
 
 	eat(str: string, required?: boolean) {
 		if (this.match(str)) {
-			this.index += str.length;
 			return true;
 		}
 
@@ -103,7 +102,10 @@ export default class Parser {
 	}
 
 	match(str: string) {
-		return this.str.slice(this.index, this.index + str.length) === str;
+		if (this.str.slice(this.index, this.index + str.length) === str) {
+			this.index += str.length;
+			return true;
+		}
 	}
 
 	peek() {
@@ -137,8 +139,11 @@ export default class Parser {
 	}
 
 	readArray(): ArrayExpression {
+		const start = this.index;
+		if (!this.eat('[')) return null;
+
 		const array: ArrayExpression = {
-			start: this.index - 1,
+			start,
 			end: null,
 			type: 'ArrayExpression',
 			elements: []
@@ -163,34 +168,67 @@ export default class Parser {
 		return array;
 	}
 
-	readLiteral(value: boolean | null): Literal {
-		const raw = String(value);
+	readBoolean(): Literal {
+		const start = this.index;
 
-		return {
-			start: this.index - raw.length,
-			end: this.index,
-			type: 'Literal',
-			raw,
-			value
-		};
+		const raw = this.read(/^(true|false)/);
+
+		if (raw) {
+			return {
+				start,
+				end: this.index,
+				type: 'Literal',
+				raw,
+				value: raw === 'true'
+			};
+		}
+	}
+
+	readNull(): Literal {
+		const start = this.index;
+
+		if (this.match('null')) {
+			return {
+				start,
+				end: this.index,
+				type: 'Literal',
+				raw: 'null',
+				value: null
+			};
+		}
+	}
+
+	readLiteral(): Literal {
+		return (
+			this.readBoolean() ||
+			this.readNumber() ||
+			this.readString() ||
+			this.readNull()
+		);
 	}
 
 	readNumber(): Literal {
 		const start = this.index;
 		const raw = this.read(/^(?:NaN|-?(?:(?:\d*\.\d+|\d+)(?:[E|e][+|-]?\d+)?|Infinity))/);
 
-		return {
-			start,
-			end: this.index,
-			type: 'Literal',
-			raw,
-			value: +raw
-		};
+		if (raw) {
+			return {
+				start,
+				end: this.index,
+				type: 'Literal',
+				raw,
+				value: +raw
+			};
+		}
 	}
 
 	readObject(): ObjectExpression {
+		const start = this.index;
+
+		if (!this.eat('{')) return;
+
 		const object: ObjectExpression = {
-			start: this.index - 1,
+			start,
 			end: null,
 			type: 'ObjectExpression',
 			properties: []
@@ -228,23 +266,28 @@ export default class Parser {
 		return property;
 	}
 
-	readPropertyKey(): Identifier | Literal {
+	readIdentifier(): Identifier {
 		const start = this.index;
-		const quote = this.read(/^['"]/);
 
-		let key: Identifier | Literal;
+		const name = this.read(validIdentifier);
 
-		if (quote) {
-			key = this.readString(quote);
-			key.name = String(key.value);
-		} else {
-			const name = this.read(validIdentifier);
-			key = {
+		if (name) {
+			return {
 				start,
 				end: this.index,
 				type: 'Identifier',
 				name
 			};
+		}
+	}
+
+	readPropertyKey(): Identifier | Literal {
+		const start = this.index;
+
+		const key = this.readString() || this.readIdentifier();
+
+		if (key.type === 'Literal') {
+			key.name = String(key.value);
 		}
 
 		this.allowWhitespaceOrComment();
@@ -253,8 +296,11 @@ export default class Parser {
 		return key;
 	}
 
-	readString(quote: string): Literal {
-		const start = this.index - 1;
+	readString(): Literal {
+		const start = this.index;
+
+		const quote = this.read(/^['"]/);
+		if (!quote) return;
 
 		let escaped = false;
 		let char: string;
@@ -284,14 +330,18 @@ export default class Parser {
 	readValue(): Value {
 		this.allowWhitespaceOrComment();
 
-		if (this.eat('[')) return this.readArray();
-		if (this.eat('{')) return this.readObject();
-		if (this.eat('true')) return this.readLiteral(true);
-		if (this.eat('false')) return this.readLiteral(false);
-		if (this.eat('null')) return this.readLiteral(null);
-		if (this.eat("'")) return this.readString("'");
-		if (this.eat('"')) return this.readString('"');
-		if (/(\d|\.)/.test(this.peek())) return this.readNumber();
+		const value = (
+			this.readArray() ||
+			this.readObject() ||
+			this.readLiteral()
+		);
+
+		if (value) {
+			this.onValue(value);
+			return value;
+		}
+
+		throw new Error(`Expected a value`);
 	}
 
 	remaining() {

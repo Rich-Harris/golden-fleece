@@ -26,9 +26,6 @@ export function patch(str: string, value: any) {
 
 	const comments: Comment[] = [];
 	const root: Value = parse(str, {
-		onComment: comment => {
-			comments.push(comment);
-		},
 		onValue: node => {
 			if (node.type === 'Literal' && typeof node.value === 'string') {
 				counts[node.raw[0]] += 1;
@@ -36,24 +33,32 @@ export function patch(str: string, value: any) {
 		}
 	});
 
-	const quote = counts[SINGLE_QUOTE] > counts[DOUBLE_QUOTE] ? SINGLE_QUOTE : DOUBLE_QUOTE;
+	const quote = counts[SINGLE_QUOTE] > counts[DOUBLE_QUOTE] ?
+		SINGLE_QUOTE :
+		DOUBLE_QUOTE;
 
-	while (comments.length > 0 && comments[0].end <= root.start) {
-		comments.shift();
-	}
-
-	while (comments.length > 0 && comments[comments.length - 1].start >= root.end) {
-		comments.pop();
-	}
+	const newlines = (
+		/\n/.test(str.slice(root.start, root.end)) ||
+		root.type === 'ArrayExpression' && root.elements.length === 0 ||
+		root.type === 'ObjectExpression' && root.properties.length === 0
+	);
 
 	return (
 		str.slice(0, root.start) +
-		patchValue(root, value, str, indentString, quote) +
+		patchValue(root, value, str, '', indentString, quote, newlines) +
 		str.slice(root.end)
 	);
 }
 
-function patchValue(node: Value, value: any, str: string, indentString: string, quote: string): string {
+function patchValue(
+	node: Value,
+	value: any,
+	str: string,
+	indentation: string,
+	indentString: string,
+	quote: string,
+	newlines: boolean
+): string {
 	const type = typeof value;
 
 	if (type === 'string') {
@@ -65,30 +70,54 @@ function patchValue(node: Value, value: any, str: string, indentString: string, 
 		return stringifyString(value, quote);
 	}
 
-	if (type === 'number' || type === 'boolean' || value === null) return String(value);
+	if (type === 'number' || type === 'boolean' || value === null) {
+		return String(value);
+	}
 
 	if (Array.isArray(value)) {
 		if (node.type === 'ArrayExpression') {
-			return patchArray(<ArrayExpression>node, value, str, indentString, quote);
+			return patchArray(
+				<ArrayExpression>node,
+				value,
+				str,
+				indentation,
+				indentString,
+				quote,
+				newlines
+			);
 		}
 
-		// TODO get indentation/newlines
-		return stringifyValue(value, quote, '', indentString, false);
+		return stringifyValue(value, quote, indentation, indentString, newlines);
 	}
 
 	if (type === 'object') {
 		if (node.type === 'ObjectExpression') {
-			return patchObject(<ObjectExpression>node, value, str, indentString, quote);
+			return patchObject(
+				<ObjectExpression>node,
+				value,
+				str,
+				indentation,
+				indentString,
+				quote,
+				newlines
+			);
 		}
 
-		// TODO get indentation/newlines
-		return stringifyValue(value, quote, '', indentString, false);
+		return stringifyValue(value, quote, indentation, indentString, newlines);
 	}
 
 	throw new Error(`Cannot stringify ${type}s`);
 }
 
-function patchArray(node: ArrayExpression, value: any, str: string, indentString: string, quote: string): string {
+function patchArray(
+	node: ArrayExpression,
+	value: any,
+	str: string,
+	indentation: string,
+	indentString: string,
+	quote: string,
+	newlines: boolean
+): string {
 	if (value.length === 0) {
 		return node.elements.length === 0 ? str.slice(node.start, node.end) : '[]';
 	}
@@ -97,12 +126,6 @@ function patchArray(node: ArrayExpression, value: any, str: string, indentString
 	const empty = precedingWhitespace === '';
 	const newline = empty || /\n/.test(precedingWhitespace);
 
-	let indentation;
-
-	if (empty) indentation = '';
-	else if (newline) indentation = precedingWhitespace.split('\n').pop();
-	else indentation = ' ';
-
 	if (node.elements.length === 0) {
 		return stringifyValue(value, quote, indentation, indentString, newline);
 	}
@@ -110,30 +133,28 @@ function patchArray(node: ArrayExpression, value: any, str: string, indentString
 	let i = 0;
 	let c = node.start;
 	let patched = '';
-	const newlinesInsideValue = str.slice(node.start, node.end).split('\n').length > 1;
+	const newlinesInsideValue =
+		str.slice(node.start, node.end).split('\n').length > 1;
 
 	for (; i < value.length; i += 1) {
 		const element = node.elements[i];
 
 		if (element) {
-			patched += (
+			patched +=
 				str.slice(c, element.start) +
-				patchValue(element, value[i], str, indentString, quote)
-			);
+				patchValue(element, value[i], str, indentation, indentString, quote, newlinesInsideValue);
 
 			c = element.end;
 		} else {
 			// append new element
 			if (newlinesInsideValue) {
-				patched += (
+				patched +=
 					`,\n${indentation + indentString}` +
-					stringifyValue(value[i], quote, indentation, indentString, true)
-				);
+					stringifyValue(value[i], quote, indentation, indentString, true);
 			} else {
-				patched += (
+				patched +=
 					`, ` +
-					stringifyValue(value[i], quote, indentation, indentString, false)
-				);
+					stringifyValue(value[i], quote, indentation, indentString, false);
 			}
 		}
 	}
@@ -146,11 +167,21 @@ function patchArray(node: ArrayExpression, value: any, str: string, indentString
 	return patched;
 }
 
-function patchObject(node: ObjectExpression, value: any, str: string, indentString: string, quote: string): string {
+function patchObject(
+	node: ObjectExpression,
+	value: any,
+	str: string,
+	indentation: string,
+	indentString: string,
+	quote: string,
+	newlines: boolean
+): string {
 	const keys = Object.keys(value);
 
 	if (keys.length === 0) {
-		return node.properties.length === 0 ? str.slice(node.start, node.end) : '{}';
+		return node.properties.length === 0
+			? str.slice(node.start, node.end)
+			: '{}';
 	}
 
 	const existingProperties: Record<string, Property> = {};
@@ -162,12 +193,6 @@ function patchObject(node: ObjectExpression, value: any, str: string, indentStri
 	const empty = precedingWhitespace === '';
 	const newline = empty || /\n/.test(precedingWhitespace);
 
-	let indentation: string;
-
-	if (empty) indentation = '';
-	else if (newline) indentation = precedingWhitespace.split('\n').pop();
-	else indentation = ' ';
-
 	if (node.properties.length === 0) {
 		return stringifyValue(value, quote, indentation, indentString, newline);
 	}
@@ -175,7 +200,7 @@ function patchObject(node: ObjectExpression, value: any, str: string, indentStri
 	let i = 0;
 	let c = node.start;
 	let patched = '';
-	const newlinesInsideValue = str.slice(node.start, node.end).split('\n').length > 1;
+	const newlinesInsideValue = /\n/.test(str.slice(node.start, node.end));
 
 	let started = false;
 	const intro = str.slice(node.start, node.properties[0].start);
@@ -184,34 +209,27 @@ function patchObject(node: ObjectExpression, value: any, str: string, indentStri
 		const property = node.properties[i];
 		const propertyValue = value[property.key.name];
 
-		// if (property) {
+		indentation = getIndentation(str, property.start);
 
 		if (propertyValue !== undefined) {
-			patched += started ?
-				str.slice(c, property.value.start) :
-				intro + str.slice(property.key.start, property.value.start);
+			patched += started
+				? str.slice(c, property.value.start)
+				: intro + str.slice(property.key.start, property.value.start);
 
-			patched += patchValue(property.value, propertyValue, str, indentString, quote);
+			patched += patchValue(
+				property.value,
+				propertyValue,
+				str,
+				indentation,
+				indentString,
+				quote,
+				newlinesInsideValue
+			);
 
 			started = true;
 		}
 
 		c = property.end;
-
-		// } else {
-		// 	// append new property
-		// 	if (newlinesInsideValue) {
-		// 		patched += (
-		// 			`,\n${indentation + indentString}` +
-		// 			stringifyValue(propertyValue, quote, indentation, indentString, true)
-		// 		);
-		// 	} else {
-		// 		patched += (
-		// 			`, ` +
-		// 			stringifyValue(propertyValue, quote, indentation, indentString, false)
-		// 		);
-		// 	}
-		// }
 	}
 
 	// append new properties
@@ -221,20 +239,40 @@ function patchObject(node: ObjectExpression, value: any, str: string, indentStri
 		const propertyValue = value[key];
 
 		if (newlinesInsideValue) {
-			patched += (
-				`,\n${indentation + indentString}` +
-				stringifyProperty(key, propertyValue, quote, indentation, indentString, true)
-			);
+			patched +=
+				`,${indentation}` +
+				stringifyProperty(
+					key,
+					propertyValue,
+					quote,
+					indentation,
+					indentString,
+					true
+				);
 		} else {
-			patched += (
+			patched +=
 				`, ` +
-				stringifyProperty(key, propertyValue, quote, indentation, indentString, false)
-			);
+				stringifyProperty(
+					key,
+					propertyValue,
+					quote,
+					indentation,
+					indentString,
+					false
+				);
 		}
 	});
 
 	patched += str.slice(c, node.end);
 	return patched;
+}
+
+function getIndentation(str: string, i: number) {
+	while (i > 0 && !whitespace.test(str[i - 1])) i -= 1;
+	const end = i;
+
+	while (i > 0 && whitespace.test(str[i - 1])) i -= 1;
+	return str.slice(i, end);
 }
 
 function getPrecedingWhitespace(str: string, i: number) {
