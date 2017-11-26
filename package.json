@@ -1,14 +1,15 @@
 {
   "name": "golden-fleece",
-  "description": "Parse JSON5 strings",
-  "version": "0.0.1",
+  "description": "Parse and manipulate JSON5 strings",
+  "version": "1.0.0",
   "main": "golden-fleece.umd.js",
   "module": "golden-fleece.es.js",
   "types": "types/index.d.ts",
   "files": [
     "golden-fleece.es.js",
     "golden-fleece.umd.js",
-    "src"
+    "src",
+    "types"
   ],
   "devDependencies": {
     "@types/mocha": "^2.2.42",
