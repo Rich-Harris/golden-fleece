@@ -1,4 +1,4 @@
-import parse from './parse';
+import { parse } from './parse';
 import {
 	stringify,
 	stringifyValue,
@@ -17,7 +17,7 @@ import {
 const SINGLE_QUOTE = "'";
 const DOUBLE_QUOTE = '"';
 
-export default function patch(str: string, value: any) {
+export function patch(str: string, value: any) {
 	const counts: Record<string, number> = {};
 	counts[SINGLE_QUOTE] = 0;
 	counts[DOUBLE_QUOTE] = 0;

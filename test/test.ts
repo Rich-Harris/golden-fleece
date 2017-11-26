@@ -299,7 +299,7 @@ describe('golden-fleece', () => {
 		});
 	});
 
-	describe.only('patch', () => {
+	describe('patch', () => {
 		const tests: Array<{
 			solo?: boolean;
 			skip?: boolean;
@@ -445,6 +445,41 @@ describe('golden-fleece', () => {
 			(test.solo ? it.only : test.skip ? it.skip : it)(`test ${i}\n${padded} `, () => {
 				const patched = fleece.patch(input, test.value);
 				assert.equal(patched, expected);
+			});
+		});
+	});
+
+	describe('stringify', () => {
+		const tests: Array<{
+			solo?: boolean;
+			skip?: boolean;
+			input: any;
+			output: string;
+			spaces?: number;
+			singleQuotes?: boolean
+		}> = [
+			{
+				input: {
+					foo: 1
+				},
+				output: `{
+					foo: 1
+				}`
+			}
+		];
+
+		tests.forEach((test, i) => {
+			const expected = test.output.replace(/^\t{4}/gm, '');
+
+			const padded = expected.split('\n').map(line => `      ${line}`).join('\n');
+
+			(test.solo ? it.only : test.skip ? it.skip : it)(`test ${i}\n${padded} `, () => {
+				const stringified = fleece.stringify(test.input, {
+					spaces: test.spaces,
+					singleQuotes: test.singleQuotes
+				});
+
+				assert.equal(stringified, expected);
 			});
 		});
 	});

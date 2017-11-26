@@ -1,7 +1,7 @@
-import parse from './parse';
+import { parse } from './parse';
 import { Value, Property } from './interfaces';
 
-export default function evaluate(str: string) {
+export function evaluate(str: string) {
 	const ast = parse(str);
 	return getValue(ast);
 }

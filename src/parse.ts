@@ -1,6 +1,6 @@
 import Parser from './Parser';
 import {
-	Options,
+	ParserOptions,
 	Value,
 	ArrayExpression,
 	ObjectExpression,
@@ -9,7 +9,7 @@ import {
 	Identifier
 } from './interfaces';
 
-export default function parse(str: string, opts?: Options) {
+export function parse(str: string, opts?: ParserOptions) {
 	const parser = new Parser(str, opts);
 	return parser.value;
 }

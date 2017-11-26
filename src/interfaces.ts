@@ -40,7 +40,13 @@ export interface Comment extends Node {
 	text: string;
 }
 
-export interface Options {
+export interface ParserOptions {
 	onComment?: (comment: Comment) => void;
 	onValue?: (value: Value) => void;
+}
+
+export interface StringifierOptions {
+	spaces?: number;
+	singleQuotes?: boolean;
+	compact?: boolean;
 }

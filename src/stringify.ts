@@ -1,6 +1,10 @@
-import { validIdentifier } from './shared';
+import { spaces, validIdentifier } from './shared';
+import { StringifierOptions } from './interfaces';
 
-export function stringify(value: any, indentString = '\t', quote = '"') {
+export function stringify(value: any, options: StringifierOptions) {
+	const quote = options.singleQuotes ? "'" : '"';
+	const indentString = options.spaces ? spaces(options.spaces) : '\t';
+
 	return stringifyValue(value, quote, '', indentString, true);
 }
 
@@ -36,6 +40,14 @@ export function stringifyValue(value: any, quote: string, indentation: string, i
 	}
 
 	if (type === 'object') {
+		const keys = Object.keys(value);
+
+		if (newlines) {
+			return `{\n${indentation + indentString}` + (
+				keys.map(key => stringifyProperty(key, value[key], quote, indentation + indentString, indentString, true)).join(`,\n${indentation + indentString}`)
+			) + `\n${indentation}}`;
+		}
+
 		return '{TODO}';
 	}
 

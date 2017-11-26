@@ -7,7 +7,7 @@ import {
 	ArrayExpression,
 	Literal,
 	Comment,
-	Options
+	ParserOptions
 } from './interfaces';
 
 type ParserState = (parser: Parser) => (ParserState | void);
@@ -22,7 +22,7 @@ export default class Parser {
 	onComment: (comment: Comment) => void;
 	onValue: (value: Value) => void;
 
-	constructor(str: string, opts?: Options) {
+	constructor(str: string, opts?: ParserOptions) {
 		this.str = str;
 		this.index = 0;
 
