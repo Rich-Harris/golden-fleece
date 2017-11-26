@@ -30,25 +30,28 @@ export function stringifyValue(value: any, quote: string, indentation: string, i
 	if (type === 'number' || type === 'boolean' || value === null) return String(value);
 
 	if (Array.isArray(value)) {
+		const elements = value.map(element => stringifyValue(element, quote, indentation + indentString, indentString, true));
+
 		if (newlines) {
 			return `[\n${indentation + indentString}` + (
-				value.map(element => stringifyValue(element, quote, indentation + indentString, indentString, true)).join(`,\n${indentation + indentString}`)
+				elements.join(`,\n${indentation + indentString}`)
 			) + `\n${indentation}]`;
 		}
 
-		return '[TODO]';
+		return `[ ${elements.join(', ')} ]`;
 	}
 
 	if (type === 'object') {
 		const keys = Object.keys(value);
+		const properties = keys.map(key => stringifyProperty(key, value[key], quote, indentation + indentString, indentString, true));
 
 		if (newlines) {
 			return `{\n${indentation + indentString}` + (
-				keys.map(key => stringifyProperty(key, value[key], quote, indentation + indentString, indentString, true)).join(`,\n${indentation + indentString}`)
+				properties.join(`,\n${indentation + indentString}`)
 			) + `\n${indentation}}`;
 		}
 
-		return '{TODO}';
+		return `{ ${properties.join(', ')} }`;
 	}
 
 	throw new Error(`Cannot stringify ${type}`);

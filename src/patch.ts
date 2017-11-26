@@ -68,11 +68,21 @@ function patchValue(node: Value, value: any, str: string, indentString: string, 
 	if (type === 'number' || type === 'boolean' || value === null) return String(value);
 
 	if (Array.isArray(value)) {
-		return patchArray(<ArrayExpression>node, value, str, indentString, quote);
+		if (node.type === 'ArrayExpression') {
+			return patchArray(<ArrayExpression>node, value, str, indentString, quote);
+		}
+
+		// TODO get indentation/newlines
+		return stringifyValue(value, quote, '', indentString, false);
 	}
 
 	if (type === 'object') {
-		return patchObject(<ObjectExpression>node, value, str, indentString, quote);
+		if (node.type === 'ObjectExpression') {
+			return patchObject(<ObjectExpression>node, value, str, indentString, quote);
+		}
+
+		// TODO get indentation/newlines
+		return stringifyValue(value, quote, '', indentString, false);
 	}
 
 	throw new Error(`Cannot stringify ${type}s`);

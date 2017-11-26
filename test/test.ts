@@ -406,6 +406,12 @@ describe('golden-fleece', () => {
 			},
 
 			{
+				input: `[ 1, 2, null ]`,
+				value: [1, 2, [3]],
+				output: `[ 1, 2, [ 3 ] ]`
+			},
+
+			{
 				input: `{  }`,
 				value: {},
 				output: `{  }`
@@ -433,6 +439,12 @@ describe('golden-fleece', () => {
 				input: `{ foo: 1, bar: 2 }`,
 				value: { foo: 3 },
 				output: `{ foo: 3 }`
+			},
+
+			{
+				input: `{ foo: 1, bar: 2, baz: null }`,
+				value: { foo: 1, bar: 2, baz: { qux: 3 } },
+				output: `{ foo: 1, bar: 2, baz: { qux: 3 } }`
 			}
 		];
 
