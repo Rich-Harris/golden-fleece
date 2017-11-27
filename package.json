@@ -12,8 +12,10 @@
     "types"
   ],
   "devDependencies": {
+    "@types/glob": "^5.0.33",
     "@types/mocha": "^2.2.42",
     "@types/node": "^8.0.26",
+    "degit": "^2.0.1",
     "glob": "^7.1.2",
     "mocha": "^3.5.0",
     "rollup": "^0.49.2",
@@ -26,7 +28,11 @@
   "scripts": {
     "build-declarations": "tsc -d && node scripts/move-declaration-files.js",
     "build": "npm run build-declarations && rollup -c",
+    "fetch_tests": "degit json5/json5-tests test/json5-tests",
     "test": "mocha --opts mocha.opts",
     "pretest": "npm run build"
+  },
+  "dependencies": {
+    "locate-character": "^2.0.1"
   }
 }

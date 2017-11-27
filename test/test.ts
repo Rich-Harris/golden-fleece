@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import * as fleece from '../src/index';
+import json5Tests from './json5';
 import {
 	Value,
 	ArrayExpression,
@@ -624,5 +625,9 @@ multi-line string',
 				assert.equal(stringified, expected);
 			});
 		});
+	});
+
+	describe.only('json5 compliance', () => {
+		json5Tests();
 	});
 });
