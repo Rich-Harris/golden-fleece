@@ -1,4 +1,10 @@
-import { number, whitespace, validIdentifier } from './shared';
+import {
+	number,
+	whitespace,
+	validIdentifier,
+	SINGLE_QUOTE,
+	DOUBLE_QUOTE
+} from './shared';
 import { locate } from 'locate-character';
 import {
 	ParserOptions,
@@ -109,22 +115,16 @@ export default class Parser {
 	}
 
 	eat(str: string, required?: boolean) {
-		if (this.match(str)) {
-			return true;
+		if (this.str.slice(this.index, this.index + str.length) === str) {
+			this.index += str.length;
+			return str;
 		}
 
 		if (required) {
 			this.error(`Expected '${str}' instead of '${this.str[this.index]}'`);
 		}
 
-		return false;
-	}
-
-	match(str: string) {
-		if (this.str.slice(this.index, this.index + str.length) === str) {
-			this.index += str.length;
-			return str;
-		}
+		return null;
 	}
 
 	peek() {
@@ -206,7 +206,7 @@ export default class Parser {
 	readNull(): Literal {
 		const start = this.index;
 
-		if (this.match('null')) {
+		if (this.eat('null')) {
 			return {
 				start,
 				end: this.index,
@@ -326,7 +326,8 @@ export default class Parser {
 	readString(): Literal {
 		const start = this.index;
 
-		const quote = this.read(/^['"]/);
+		// const quote = this.read(/^['"]/);
+		const quote = this.eat(SINGLE_QUOTE) || this.eat(DOUBLE_QUOTE);
 		if (!quote) return;
 
 		let escaped = false;

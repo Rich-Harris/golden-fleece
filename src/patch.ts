@@ -5,7 +5,7 @@ import {
 	stringifyProperty,
 	stringifyString
 } from './stringify';
-import { whitespace } from './shared';
+import { whitespace, SINGLE_QUOTE, DOUBLE_QUOTE } from './shared';
 import {
 	Value,
 	Property,
@@ -14,9 +14,6 @@ import {
 	Literal,
 	Comment
 } from './interfaces';
-
-const SINGLE_QUOTE = "'";
-const DOUBLE_QUOTE = '"';
 
 export function patch(str: string, value: any) {
 	const counts: Record<string, number> = {};
