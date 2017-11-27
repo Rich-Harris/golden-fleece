@@ -1,4 +1,5 @@
 import { whitespace, validIdentifier } from './shared';
+import { locate } from 'locate-character';
 import {
 	ParserOptions,
 	Value,
@@ -18,6 +19,21 @@ export function parse(str: string, opts?: ParserOptions) {
 type ParserState = (parser: Parser) => (ParserState | void);
 
 function noop(){}
+
+class ParseError extends Error {
+	pos: number;
+	loc: {
+		line: number;
+		column: number;
+	}
+
+	constructor(message: string, pos: number, loc: { line: number, column: number }) {
+		super(message);
+
+		this.pos = pos;
+		this.loc = loc;
+	}
+}
 
 export default class Parser {
 	str: string;
@@ -78,7 +94,7 @@ export default class Parser {
 					block: true
 				});
 
-				this.eat('*/');
+				this.eat('*/', true);
 			}
 		} else {
 			return;
@@ -88,8 +104,8 @@ export default class Parser {
 	}
 
 	error(message: string, index = this.index) {
-		throw new Error(message); // TODO
-		// throw new ParseError(message, this.template, index, this.filename);
+		const loc = locate(this.str, index, { offsetLine: 1 });
+		throw new ParseError(message, index, loc);
 	}
 
 	eat(str: string, required?: boolean) {
@@ -98,7 +114,7 @@ export default class Parser {
 		}
 
 		if (required) {
-			this.error(`Expected ${str}`);
+			this.error(`Expected '${str}' instead of '${this.str[this.index]}'`);
 		}
 
 		return false;
@@ -164,7 +180,7 @@ export default class Parser {
 		}
 
 		if (!this.eat(']')) {
-			this.error(`expected ',' or ']'`);
+			this.error(`Expected ']' instead of '${this.str[this.index]}'`);
 		}
 
 		array.end = this.index;
@@ -301,6 +317,8 @@ export default class Parser {
 
 		const key = this.readString() || this.readIdentifier();
 
+		if (!key) this.error(`Bad identifier as unquoted key`);
+
 		if (key.type === 'Literal') {
 			key.name = String(key.value);
 		}
@@ -342,6 +360,7 @@ export default class Parser {
 					value
 				};
 			} else {
+				if (char === '\n') this.error(`Bad string`, this.index - 1);
 				value += char;
 			}
 		}
@@ -363,6 +382,6 @@ export default class Parser {
 			return value;
 		}
 
-		throw new Error(`Expected a value`);
+		this.error(`Unexpected EOF`);
 	}
 }

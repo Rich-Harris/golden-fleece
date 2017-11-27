@@ -33,6 +33,6 @@
     "pretest": "npm run build"
   },
   "dependencies": {
-    "locate-character": "^2.0.1"
+    "locate-character": "^2.0.3"
   }
 }
