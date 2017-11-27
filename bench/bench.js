@@ -12,7 +12,7 @@ const JSON5 = require('json5');
 const fleece = require('../golden-fleece.umd.js');
 
 function getFixtures(ext) {
-	return glob.sync('**/*.json', { cwd: 'test/json5-tests' });
+	return glob.sync(`**/*.${ext}`, { cwd: 'test/json5-tests' });
 }
 
 const queue = [];
@@ -50,6 +50,7 @@ function next() {
 	}
 
 	const { title, suite } = queue.shift();
+
 	console.log(chalk.bold(title));
 
 	suite.on('complete', () => {
