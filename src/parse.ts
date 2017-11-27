@@ -218,7 +218,7 @@ export default class Parser {
 			this.read(/[-+]?Infinity/) ||
 			this.read(/[-+]?0[xX][a-fA-F0-9]+/) ||
 			this.read(/[-+]?0[bB][01]+/) ||
-			this.read(/^(?:[-+]?(?:(?:\d*\.\d+|\d+\.\d*|\d+)(?:[E|e][+|-]?\d+)?))/)
+			this.read(/^(?:[-+]?(?:(?:(?:[1-9]\d*|0)?\.\d+|(?:[1-9]\d*|0)\.\d*|(?:[1-9]\d*|0))(?:[E|e][+|-]?\d+)?))/)
 		);
 
 		if (raw) {

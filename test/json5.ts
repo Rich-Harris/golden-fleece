@@ -38,6 +38,20 @@ export default () => {
 			});
 		});
 	});
+
+	describe('fails to parse valid JS that is invalid JSON5', () => {
+		const files = glob.sync('test/**/*.js');
+
+		files.forEach(file => {
+			(solo(file) ? it.only : it)(file, () => {
+				const source = fs.readFileSync(file, 'utf-8');
+
+				assert.throws(() => {
+					fleece.evaluate(source);
+				});
+			});
+		});
+	});
 };
 
 function solo(file: string) {
