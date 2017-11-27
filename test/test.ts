@@ -201,7 +201,7 @@ describe('golden-fleece', () => {
 
 			{
 				input: `[true true]`,
-				error: /expected ',' or ']'/
+				error: /Expected ']' instead of 't'/
 			},
 
 			// null
@@ -627,7 +627,7 @@ multi-line string',
 		});
 	});
 
-	describe.only('json5 compliance', () => {
+	describe('json5 compliance', () => {
 		json5Tests();
 	});
 });
