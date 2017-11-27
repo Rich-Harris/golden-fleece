@@ -1,4 +1,4 @@
-import { whitespace, validIdentifier } from './shared';
+import { number, whitespace, validIdentifier } from './shared';
 import { locate } from 'locate-character';
 import {
 	ParserOptions,
@@ -229,13 +229,7 @@ export default class Parser {
 	readNumber(): Literal {
 		const start = this.index;
 
-		const raw = (
-			this.match('NaN') ||
-			this.read(/^[-+]?Infinity/) ||
-			this.read(/^[-+]?0[xX][a-fA-F0-9]+/) ||
-			this.read(/^[-+]?0[bB][01]+/) ||
-			this.read(/^(?:[-+]?(?:(?:(?:[1-9]\d*|0)?\.\d+|(?:[1-9]\d*|0)\.\d*|(?:[1-9]\d*|0))(?:[E|e][+|-]?\d+)?))/)
-		);
+		const raw = this.read(number);
 
 		if (raw) {
 			const sign = raw[0];
