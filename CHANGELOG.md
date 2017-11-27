@@ -1,5 +1,10 @@
 # golden-fleece changelog
 
+## 1.0.2
+
+* Incorporate JSON5 tests to ensure compliance
+* Various parser fixes
+
 ## 1.0.1
 
 * Implement `onValue`
