@@ -576,6 +576,25 @@ multi-line string',
 						[ 7, 8 ]
 					]
 				}`
+			},
+
+			{
+				input: `{
+					foo: 1
+				}`,
+				value: {
+					foo: 1,
+					bar: {
+						x: 0, y: 0
+					}
+				},
+				output: `{
+					foo: 1,
+					bar: {
+						x: 0,
+						y: 0
+					}
+				}`
 			}
 		];
 

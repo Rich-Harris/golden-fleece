@@ -5,7 +5,7 @@ export function stringify(value: any, options: StringifierOptions) {
 	const quote = options.singleQuotes ? "'" : '"';
 	const indentString = options.spaces ? spaces(options.spaces) : '\t';
 
-	return stringifyValue(value, quote, '', indentString, true);
+	return stringifyValue(value, quote, '\n', indentString, true);
 }
 
 export function stringifyString(str: string, quote: string) {
@@ -80,9 +80,9 @@ export function stringifyValue(
 
 		if (newlines) {
 			return (
-				`{\n${indentation + indentString}` +
-				properties.join(`,\n${indentation + indentString}`) +
-				`\n${indentation}}`
+				`{${indentation + indentString}` +
+				properties.join(`,${indentation + indentString}`) +
+				`${indentation}}`
 			);
 		}
 
