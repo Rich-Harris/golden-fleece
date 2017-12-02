@@ -1,5 +1,9 @@
 # golden-fleece changelog
 
+## 1.0.3
+
+* Remove excess newlines when stringifying objects
+
 ## 1.0.2
 
 * Incorporate JSON5 tests to ensure compliance
