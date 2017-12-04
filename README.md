@@ -4,7 +4,7 @@ Parse a [JSON5](http://json5.org/) string (like JSON, but less strict).
 
 ## Why?
 
-For the [Svelte REPL](https://svlte.technology/repl), where we want to allow arbitrary data in the bottom right-hand panel, but we also want to update the object without reformatting it as JSON.
+For the [Svelte REPL](https://svelte.technology/repl), where we want to allow arbitrary data in the bottom right-hand panel, but we also want to update the object without reformatting it as JSON.
 
 
 ## Usage
