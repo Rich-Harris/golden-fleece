@@ -627,6 +627,24 @@ multi-line string',
 				output: `{
 					foo: 1
 				}`
+			},
+
+			{
+				input: {
+					'foo-bar': 1
+				},
+				output: `{
+					"foo-bar": 1
+				}`
+			},
+
+			{
+				input: {
+					'foo.bar': 1
+				},
+				output: `{
+					"foo.bar": 1
+				}`
 			}
 		];
 

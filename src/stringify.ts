@@ -1,4 +1,4 @@
-import { spaces, validIdentifier } from './shared';
+import { spaces, entirelyValidIdentifier } from './shared';
 import { StringifierOptions } from './interfaces';
 
 export function stringify(value: any, options: StringifierOptions) {
@@ -21,7 +21,7 @@ export function stringifyProperty(
 	newlines: boolean
 ): string {
 	return (
-		(validIdentifier.test(key) ? key : stringifyString(key, quote)) +
+		(entirelyValidIdentifier.test(key) ? key : stringifyString(key, quote)) +
 		': ' +
 		stringifyValue(value, quote, indentation, indentString, newlines)
 	);
