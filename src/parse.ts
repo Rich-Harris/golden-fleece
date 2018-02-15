@@ -1,7 +1,7 @@
 import {
 	number,
 	whitespace,
-	validIdentifier,
+	validIdentifierCharacters,
 	SINGLE_QUOTE,
 	DOUBLE_QUOTE
 } from './shared';
@@ -294,7 +294,7 @@ export default class Parser {
 	readIdentifier(): Identifier {
 		const start = this.index;
 
-		const name = this.read(validIdentifier);
+		const name = this.read(validIdentifierCharacters);
 
 		if (name) {
 			return {
