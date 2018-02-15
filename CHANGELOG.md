@@ -1,5 +1,10 @@
 # golden-fleece changelog
 
+## 1.0.4
+
+* Ensure keys are properly quoted ([#3](https://github.com/Rich-Harris/golden-fleece/pull/3))
+* Make options... optional ([#4](https://github.com/Rich-Harris/golden-fleece/pull/4))
+
 ## 1.0.3
 
 * Remove excess newlines when stringifying objects
