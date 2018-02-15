@@ -1,9 +1,9 @@
 import { spaces, validIdentifier } from './shared';
 import { StringifierOptions } from './interfaces';
 
-export function stringify(value: any, options: StringifierOptions) {
-	const quote = options.singleQuotes ? "'" : '"';
-	const indentString = options.spaces ? spaces(options.spaces) : '\t';
+export function stringify(value: any, options?: StringifierOptions) {
+	const quote = (options && options.singleQuotes) ? "'" : '"';
+	const indentString = (options && options.spaces) ? spaces(options.spaces) : '\t';
 
 	return stringifyValue(value, quote, '\n', indentString, true);
 }

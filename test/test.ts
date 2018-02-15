@@ -644,6 +644,10 @@ multi-line string',
 				assert.equal(stringified, expected);
 			});
 		});
+
+		it('should be cool with no options object passed in', () => {
+			fleece.stringify('foo');
+		})
 	});
 
 	describe('json5 compliance', () => {
