@@ -649,6 +649,39 @@ multi-line string',
 				output: `{
 					"foo.bar": 1
 				}`
+			},
+
+			{
+				input: '\n',
+				output: `"\\n"`
+			},
+
+			{
+				input: '\n',
+				output: `'\\n'`,
+				singleQuotes: true
+			},
+
+			{
+				input: '"',
+				output: `"\\""`
+			},
+
+			{
+				input: '"',
+				output: `'"'`,
+				singleQuotes: true
+			},
+
+			{
+				input: "'",
+				output: `"'"`
+			},
+
+			{
+				input: "'",
+				output: `'\\''`,
+				singleQuotes: true
 			}
 		];
 
