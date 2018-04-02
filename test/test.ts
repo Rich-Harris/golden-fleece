@@ -348,6 +348,11 @@ multi-line string',
 						'trailing commas too',
 					],
 				}
+			},
+
+			{
+				input: `"\\n"`,
+				output: `\n`
 			}
 		];
 

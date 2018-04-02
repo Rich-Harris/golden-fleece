@@ -41,6 +41,16 @@ class ParseError extends Error {
 	}
 }
 
+const escapeable: Record<string, string> = {
+	b: '\b',
+	n: '\n',
+	f: '\f',
+	r: '\r',
+	t: '\t',
+	v: '\v',
+	0: '\0'
+};
+
 export default class Parser {
 	str: string;
 	index: number;
@@ -338,10 +348,16 @@ export default class Parser {
 			const char = this.str[this.index++];
 
 			if (escaped) {
-				if (char !== '\r' || this.str[this.index] !== '\n') {
-					escaped = false;
-					if (char === quote) value += char;
+				escaped = false;
+
+				// line continuations
+				if (char === '\n') continue;
+				if (char === '\r') {
+					if (this.str[this.index] === '\n') this.index += 1;
+					continue;
 				}
+
+				value += escapeable[char] || char;
 			} else if (char === '\\') {
 				escaped = true;
 			} else if (char === quote) {
