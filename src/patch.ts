@@ -254,8 +254,7 @@ function patchObject(
 		const propertyValue = value[key];
 
 		patched +=
-			(started ? ',' : intro) +
-			(newlinesInsideValue ? indentation : ' ') +
+			(started ? ',' + (newlinesInsideValue ? indentation : ' ') : intro) +
 			stringifyProperty(
 				key,
 				propertyValue,
