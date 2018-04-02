@@ -599,6 +599,22 @@ multi-line string',
 						y: 0
 					}
 				}`
+			},
+
+			{
+				input: `{foo:'foo'}`,
+				value: { bar: 'bar' },
+				output: `{bar: 'bar'}`
+			},
+
+			{
+				input: `{
+					foo: 'foo'
+				}`,
+				value: { bar: 'bar' },
+				output: `{
+					bar: 'bar'
+				}`
 			}
 		];
 

@@ -253,29 +253,17 @@ function patchObject(
 
 		const propertyValue = value[key];
 
-		if (newlinesInsideValue) {
-			patched +=
-				`,${indentation}` +
-				stringifyProperty(
-					key,
-					propertyValue,
-					quote,
-					indentation,
-					indentString,
-					true
-				);
-		} else {
-			patched +=
-				`, ` +
-				stringifyProperty(
-					key,
-					propertyValue,
-					quote,
-					indentation,
-					indentString,
-					false
-				);
-		}
+		patched +=
+			(started ? ',' + (newlinesInsideValue ? indentation : ' ') : intro) +
+			stringifyProperty(
+				key,
+				propertyValue,
+				quote,
+				indentation,
+				indentString,
+				newlinesInsideValue
+			);
+		started = true;
 	});
 
 	patched += str.slice(c, node.end);
