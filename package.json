@@ -35,7 +35,7 @@
     "build": "npm run build-declarations && rollup -c",
     "fetch_tests": "degit json5/json5-tests test/json5-tests",
     "test": "mocha --opts mocha.opts",
-    "pretest": "npm run build"
+    "prepublishOnly": "npm test && npm run build"
   },
   "dependencies": {
     "locate-character": "^2.0.3"
