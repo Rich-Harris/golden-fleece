@@ -41,6 +41,7 @@ class ParseError extends Error {
 	}
 }
 
+// https://mathiasbynens.be/notes/javascript-escapes
 const escapeable: Record<string, string> = {
 	b: '\b',
 	n: '\n',
