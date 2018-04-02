@@ -1,5 +1,11 @@
 # golden-fleece changelog
 
+## 1.0.6
+
+* Fix stringification of strings with characters that need to be escaped ([#10](https://github.com/Rich-Harris/golden-fleece/pull/10))
+* Correctly patch objects with no properties in common ([#9](https://github.com/Rich-Harris/golden-fleece/pull/9))
+* Remove `locate-character` from dependencies (it is bundled) ([#11](https://github.com/Rich-Harris/golden-fleece/pull/11))
+
 ## 1.0.5
 
 * Correctly handle newlines ([#6](https://github.com/Rich-Harris/golden-fleece/issues/6))

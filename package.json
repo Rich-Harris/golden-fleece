@@ -1,7 +1,7 @@
 {
   "name": "golden-fleece",
   "description": "Parse and manipulate JSON5 strings",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "main": "golden-fleece.umd.js",
   "module": "golden-fleece.es.js",
   "types": "types/index.d.ts",
