@@ -8,8 +8,25 @@ export function stringify(value: any, options?: StringifierOptions) {
 	return stringifyValue(value, quote, '\n', indentString, true);
 }
 
+// https://mathiasbynens.be/notes/javascript-escapes
+const escapeable: Record<string, string> = {
+	"'": "'",
+	'"': '"',
+	'\b': 'b',
+	'\n': 'n',
+	'\f': 'f',
+	'\r': 'r',
+	'\t': 't',
+	'\v': 'v',
+	'\0': '0'
+};
+const escapeableRegex = new RegExp(`[${Object.keys(escapeable).join('')}]`, 'g');
+
 export function stringifyString(str: string, quote: string) {
-	return quote + str.replace(quote === "'" ? /'/g : /"/g, '\\' + quote) + quote;
+	const otherQuote = quote === '"' ? "'" : '"';
+	return quote + str.replace(escapeableRegex, char =>
+		char === otherQuote ? char : '\\' + escapeable[char]
+	) + quote;
 }
 
 export function stringifyProperty(
