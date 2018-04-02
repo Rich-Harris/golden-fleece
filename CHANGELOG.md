@@ -1,5 +1,9 @@
 # golden-fleece changelog
 
+## 1.0.5
+
+* Correctly handle newlines ([#6](https://github.com/Rich-Harris/golden-fleece/issues/6))
+
 ## 1.0.4
 
 * Ensure keys are properly quoted ([#3](https://github.com/Rich-Harris/golden-fleece/pull/3))
