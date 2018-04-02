@@ -12,15 +12,18 @@ export function stringify(value: any, options?: StringifierOptions) {
 const escapeable: Record<string, string> = {
 	"'": "'",
 	'"': '"',
+	'\\': '\\',
 	'\b': 'b',
-	'\n': 'n',
 	'\f': 'f',
+	'\n': 'n',
 	'\r': 'r',
 	'\t': 't',
 	'\v': 'v',
-	'\0': '0'
+	'\0': '0',
+	'\u2028': 'u2028',
+	'\u2029': 'u2029',
 };
-const escapeableRegex = new RegExp(`[${Object.keys(escapeable).join('')}]`, 'g');
+const escapeableRegex = /['"\\\b\f\n\r\t\v\0\u2028\u2029]/g;
 
 export function stringifyString(str: string, quote: string) {
 	const otherQuote = quote === '"' ? "'" : '"';
