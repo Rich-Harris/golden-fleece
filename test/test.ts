@@ -362,7 +362,6 @@ multi-line string',
 			const padded = input.split('\n').map(line => `      ${line}`).join('\n');
 
 			(test.solo ? it.only : test.skip ? it.skip : it)(`test ${i}\n${padded} `, () => {
-				console.log({input})
 				const value = fleece.evaluate(input);
 				assert.deepEqual(value, test.output);
 			});
