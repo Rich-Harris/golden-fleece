@@ -353,6 +353,16 @@ multi-line string',
 			{
 				input: `"\\n"`,
 				output: `\n`
+			},
+
+			{
+				input: `"a\\x42c"`,
+				output: 'aBc'
+			},
+
+			{
+				input: `"a\\u0042c"`,
+				output: 'aBc'
 			}
 		];
 
