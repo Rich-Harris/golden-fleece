@@ -361,8 +361,12 @@ export default class Parser {
 				}
 
 				if (char === 'x' || char === 'u') {
-					const code = this.str.slice(this.index, this.index += char === 'x' ? 2 : 4);
-					if (!hex.test(code)) this.error(`Invalid ${char === 'x' ? 'hexadecimal' : 'Unicode'} escape sequence`);
+					const start = this.index;
+					const end = this.index += (char === 'x' ? 2 : 4);
+
+					const code = this.str.slice(start, end);
+					if (!hex.test(code)) this.error(`Invalid ${char === 'x' ? 'hexadecimal' : 'Unicode'} escape sequence`, start);
+
 					value += String.fromCharCode(parseInt(code, 16));
 				}
 
