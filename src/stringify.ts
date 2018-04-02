@@ -8,7 +8,7 @@ export function stringify(value: any, options?: StringifierOptions) {
 	return stringifyValue(value, quote, '\n', indentString, true);
 }
 
-// https://mathiasbynens.be/notes/javascript-escapes
+// https://github.com/json5/json5/blob/65bcc556eb629984b33bb2163cbc10fba4597300/src/stringify.js#L110
 const escapeable: Record<string, string> = {
 	"'": "'",
 	'"': '"',
