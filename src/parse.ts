@@ -52,7 +52,7 @@ const escapeable: Record<string, string> = {
 	0: '\0'
 };
 
-const hex = /[a-fA-F0-9]/;
+const hex = /^[a-fA-F0-9]+$/;
 
 export default class Parser {
 	str: string;
