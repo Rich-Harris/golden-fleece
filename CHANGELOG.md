@@ -1,5 +1,9 @@
 # golden-fleece changelog
 
+## 1.0.8
+
+* Oops, publish fail
+
 ## 1.0.7
 
 * Handle `\x` and `\u` sequences ([#12](https://github.com/Rich-Harris/golden-fleece/pull/12))
