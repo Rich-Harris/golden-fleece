@@ -718,6 +718,21 @@ multi-line string',
 				input: "'",
 				output: `'\\''`,
 				singleQuotes: true
+			},
+
+			{
+				input: `\\`,
+				output: `"\\\\"`
+			},
+
+			{
+				input: `\b`,
+				output: `"\\b"`
+			},
+
+			{
+				input: `\u2028`,
+				output: `"\\u2028"`
 			}
 		];
 
