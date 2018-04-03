@@ -1,5 +1,10 @@
 # golden-fleece changelog
 
+## 1.0.7
+
+* Handle `\x` and `\u` sequences ([#12](https://github.com/Rich-Harris/golden-fleece/pull/12))
+* Correctly stringify backslashes etc ([#13](https://github.com/Rich-Harris/golden-fleece/pull/13))
+
 ## 1.0.6
 
 * Fix stringification of strings with characters that need to be escaped ([#10](https://github.com/Rich-Harris/golden-fleece/pull/10))
