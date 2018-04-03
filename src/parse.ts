@@ -52,6 +52,8 @@ const escapeable: Record<string, string> = {
 	0: '\0'
 };
 
+const hex = /^[a-fA-F0-9]+$/;
+
 export default class Parser {
 	str: string;
 	index: number;
@@ -358,7 +360,19 @@ export default class Parser {
 					continue;
 				}
 
-				value += escapeable[char] || char;
+				if (char === 'x' || char === 'u') {
+					const start = this.index;
+					const end = this.index += (char === 'x' ? 2 : 4);
+
+					const code = this.str.slice(start, end);
+					if (!hex.test(code)) this.error(`Invalid ${char === 'x' ? 'hexadecimal' : 'Unicode'} escape sequence`, start);
+
+					value += String.fromCharCode(parseInt(code, 16));
+				}
+
+				else {
+					value += escapeable[char] || char;
+				}
 			} else if (char === '\\') {
 				escaped = true;
 			} else if (char === quote) {

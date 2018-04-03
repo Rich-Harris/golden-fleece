@@ -249,6 +249,16 @@ describe('golden-fleece', () => {
 						text: 'comment'
 					}
 				]
+			},
+
+			{
+				input: `"\\xzz"`,
+				error: /Invalid hexadecimal escape sequence/
+			},
+
+			{
+				input: `"\\uzzzz"`,
+				error: /Invalid Unicode escape sequence/
 			}
 		];
 
@@ -353,6 +363,16 @@ multi-line string',
 			{
 				input: `"\\n"`,
 				output: `\n`
+			},
+
+			{
+				input: `"a\\x42c"`,
+				output: 'aBc'
+			},
+
+			{
+				input: `"a\\u0042c"`,
+				output: 'aBc'
 			}
 		];
 
