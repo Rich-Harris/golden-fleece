@@ -37,5 +37,9 @@
     "fetch_tests": "degit json5/json5-tests test/json5-tests",
     "test": "mocha --opts mocha.opts",
     "prepublishOnly": "npm test && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rich-Harris/golden-fleece.git"
   }
 }
