@@ -56,6 +56,17 @@ describe('golden-fleece', () => {
 				}
 			},
 
+			{
+				input: `-1`,
+				output: {
+					start: 0,
+					end: 2,
+					type: 'Literal',
+					raw: '-1',
+					value: -1
+				}
+			},
+
 			// strings
 			{
 				input: "'single-quotes'",
@@ -415,6 +426,30 @@ multi-line string',
 			},
 
 			{
+				input: `+0Xa`,
+				value: 11,
+				output: `+0Xb`
+			},
+
+			{
+				input: `0b10`,
+				value: -7,
+				output: `-0b111`
+			},
+
+			{
+				input: `0o660`,
+				value: 504,
+				output: `0o770`
+			},
+
+			{
+				input: `+0x10`,
+				value: 0.5,
+				output: `+0.5`
+			},
+
+			{
 				input: `+10`,
 				value: 5,
 				output: `+5`
@@ -424,6 +459,18 @@ multi-line string',
 				input: `-.5`,
 				value: -0.2,
 				output: `-.2`
+			},
+
+			{
+				input: `.5`,
+				value: 10,
+				output: '10'
+			},
+
+			{
+				input: `-1`,
+				value: -2,
+				output: `-2`
 			},
 
 			{
