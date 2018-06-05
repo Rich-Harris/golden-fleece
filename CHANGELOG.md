@@ -1,5 +1,9 @@
 # golden-fleece changelog
 
+## 1.0.9
+
+* Various fixes/improvements to number patching ([#16](https://github.com/Rich-Harris/golden-fleece/issues/16))
+
 ## 1.0.8
 
 * Oops, publish fail
