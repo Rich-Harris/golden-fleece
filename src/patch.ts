@@ -112,13 +112,27 @@ function patchValue(
 }
 
 function patchNumber(raw: string, value: number) {
-	if (raw.slice(0, 2) === '0x') return '0x' + value.toString(16);
-	if (raw.slice(0, 2) === '0b') return '0b' + value.toString(2);
+	const matchRadix = /^([-+])?0([boxBOX])/.exec(raw);
+
+	if (matchRadix) {
+		return (
+			(matchRadix[1] === '+' && value >= 0 ? '+' : value < 0 ? '-' : '') +
+			'0' + matchRadix[2] +
+			Math.abs(value).toString(
+				matchRadix[2] === 'b' || matchRadix[2] === 'B' ? 2 :
+				matchRadix[2] === 'o' || matchRadix[2] === 'O' ? 8 :
+				matchRadix[2] === 'x' || matchRadix[2] === 'X' ? 16 : null
+			)
+		);
+	}
 
 	const match = /^([-+])?(\.)?/.exec(raw);
 
 	if (match && match[0].length > 0) {
-		return (match[1] || '') + (match[2] ? String(Math.abs(value)).slice(1) : String(value));
+		return (
+			(match[1] === '+' && value >= 0 ? '+' : value < 0 ? '-' : '') +
+			(match[2] ? String(Math.abs(value)).replace(/^0/, '') : String(Math.abs(value)))
+		);
 	}
 
 	return String(value);
