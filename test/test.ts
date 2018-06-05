@@ -444,6 +444,12 @@ multi-line string',
 			},
 
 			{
+				input: `+0x10`,
+				value: 0.5,
+				output: `+0.5`
+			},
+
+			{
 				input: `+10`,
 				value: 5,
 				output: `+5`

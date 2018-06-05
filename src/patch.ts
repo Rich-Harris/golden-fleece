@@ -114,7 +114,7 @@ function patchValue(
 function patchNumber(raw: string, value: number) {
 	const matchRadix = /^([-+])?0([boxBOX])/.exec(raw);
 
-	if (matchRadix) {
+	if (matchRadix && value % 1 === 0) {
 		return (
 			(matchRadix[1] === '+' && value >= 0 ? '+' : value < 0 ? '-' : '') +
 			'0' + matchRadix[2] +
