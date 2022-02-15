@@ -9,8 +9,7 @@ init:
 
 environment:
   matrix:
-    # node.js
-    - nodejs_version: 9
+    - nodejs_version: 16
 
 install:
   - ps: Install-Product node $env:nodejs_version
