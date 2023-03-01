@@ -21,7 +21,7 @@
     "glob": "^7.1.2",
     "json5": "^0.5.1",
     "locate-character": "^2.0.3",
-    "mocha": "^3.5.0",
+    "mocha": "^10.2.0",
     "right-pad": "^1.0.1",
     "rollup": "^0.49.2",
     "rollup-plugin-node-resolve": "^3.0.0",
